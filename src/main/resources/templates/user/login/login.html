@@ -5,8 +5,11 @@
 <div th:replace="layout/top::header"></div>
 <div class="login-form d-flex justify-content-center">
     <div class="col-sm-5" style="margin-top: 30px;">
-        <div class="panel">
+        <div style="text-align:center" class="panel">
             <p>아이디를 입력해 주세요</p>
+        </div>
+        <div style="text-align:center" th:if="${param.error}" class="form-group">
+            <span th:text="${param.exception}" class="alert alert-danger"></span>
         </div>
         <form th:action="@{/login_proc}" class="form-signin" method="post">
             <input th:type="hidden" th:value="secret" name="secret_key">

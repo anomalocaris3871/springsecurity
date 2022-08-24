@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @EnableWebSecurity
@@ -30,13 +31,16 @@ public class SecurityConfiguration {
     private UserDetailsService userDetailsService;
     private AuthenticationDetailsSource authenticationDetailsSource;
     private AuthenticationSuccessHandler authenticationSuccessHandler;
+    private AuthenticationFailureHandler authenticationFailureHandler;
 
 
-    public SecurityConfiguration(UserDetailsService userDetailsService, AuthenticationDetailsSource authenticationDetailsSource, AuthenticationSuccessHandler authenticationSuccessHandler) {
+    public SecurityConfiguration(UserDetailsService userDetailsService, AuthenticationDetailsSource authenticationDetailsSource, AuthenticationSuccessHandler authenticationSuccessHandler, AuthenticationFailureHandler authenticationFailureHandler) {
         this.userDetailsService = userDetailsService;
         this.authenticationDetailsSource = authenticationDetailsSource;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
+        this.authenticationFailureHandler = authenticationFailureHandler;
     }
+
     @Autowired
 
 
@@ -45,7 +49,7 @@ public class SecurityConfiguration {
 
         http
                 .authorizeRequests()
-                .antMatchers("/", "/users").permitAll()
+                .antMatchers("/", "/login*").permitAll()
                 .antMatchers("/mypage").hasRole(USER)
                 .antMatchers("/messages").hasRole(MANAGER)
                 .antMatchers("/config").hasRole(ADMIN)
@@ -57,6 +61,7 @@ public class SecurityConfiguration {
                 .authenticationDetailsSource(this.authenticationDetailsSource)
                 .defaultSuccessUrl("/")
                 .successHandler(this.authenticationSuccessHandler)
+                .failureHandler(this.authenticationFailureHandler)
                 .permitAll()
         ;
 
