@@ -1,5 +1,7 @@
 package io.security.corespringsecurity.security.configs;
 
+import io.security.corespringsecurity.security.common.FormAuthenticationDetailsSource;
+import io.security.corespringsecurity.security.handler.CustomAccessDeniedHandler;
 import io.security.corespringsecurity.security.provider.CustomAuthenticationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -17,6 +19,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
@@ -29,12 +32,12 @@ public class SecurityConfiguration {
     private final String ADMIN = "ADMIN";
 
     private UserDetailsService userDetailsService;
-    private AuthenticationDetailsSource authenticationDetailsSource;
+    private FormAuthenticationDetailsSource authenticationDetailsSource;
     private AuthenticationSuccessHandler authenticationSuccessHandler;
     private AuthenticationFailureHandler authenticationFailureHandler;
 
 
-    public SecurityConfiguration(UserDetailsService userDetailsService, AuthenticationDetailsSource authenticationDetailsSource, AuthenticationSuccessHandler authenticationSuccessHandler, AuthenticationFailureHandler authenticationFailureHandler) {
+    public SecurityConfiguration(UserDetailsService userDetailsService, FormAuthenticationDetailsSource authenticationDetailsSource, AuthenticationSuccessHandler authenticationSuccessHandler, AuthenticationFailureHandler authenticationFailureHandler) {
         this.userDetailsService = userDetailsService;
         this.authenticationDetailsSource = authenticationDetailsSource;
         this.authenticationSuccessHandler = authenticationSuccessHandler;
@@ -58,14 +61,22 @@ public class SecurityConfiguration {
                 .formLogin()
                 .loginPage("/login")
                 .loginProcessingUrl("/login_proc")
-                .authenticationDetailsSource(this.authenticationDetailsSource)
                 .defaultSuccessUrl("/")
+                .authenticationDetailsSource(this.authenticationDetailsSource)
                 .successHandler(this.authenticationSuccessHandler)
                 .failureHandler(this.authenticationFailureHandler)
-                .permitAll()
+                .permitAll().and().exceptionHandling().accessDeniedHandler(accessDeniedHandler())
         ;
 
+
         return http.build();
+    }
+
+    @Bean
+    public AccessDeniedHandler accessDeniedHandler() {
+        CustomAccessDeniedHandler accessDeniedHandler = new CustomAccessDeniedHandler();
+        accessDeniedHandler.setErrorPage("/denied");
+        return accessDeniedHandler;
     }
 
     @Bean
